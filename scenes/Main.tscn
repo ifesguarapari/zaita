@@ -1,0 +1,103 @@
+[gd_scene format=3 uid="uid://bpr1s13hl0vn2"]
+
+[ext_resource type="Script" uid="uid://chrpljknj7sq3" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://bdadl2gfi6dsk" path="res://scripts/MazeGenerator.gd" id="2_maze"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/PopupMessage.tscn" id="4_popup"]
+[ext_resource type="PackedScene" path="res://scenes/StartPopup.tscn" id="5_start"]
+[ext_resource type="PackedScene" path="res://scenes/TouchJoystick.tscn" id="6_joystick"]
+[ext_resource type="Script" path="res://scripts/ColorFocusOverlay.gd" id="8_focus"]
+[ext_resource type="Shader" uid="uid://b2e4dvskbx0d2" path="res://assets/shaders/color_focus.gdshader" id="9_focus_shader"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_world_bounds_placeholder"]
+size = Vector2(1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_focus"]
+shader = ExtResource("9_focus_shader")
+shader_parameter/focus_position = Vector2(0.5, 0.5)
+shader_parameter/aspect_ratio = 1.777
+shader_parameter/color_radius = 0.14
+shader_parameter/fade_width = 0.42
+shader_parameter/distant_saturation = 0.08
+shader_parameter/distant_brightness = 0.58
+shader_parameter/vignette_strength = 0.28
+
+[node name="Main" type="Node2D" unique_id=2100362352]
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="." unique_id=19559475]
+offset_right = 7000.0
+offset_bottom = 7000.0
+mouse_filter = 2
+color = Color(0.11, 0.09, 0.1, 1)
+
+[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1020203349]
+color = Color(0.72, 0.74, 0.8, 1)
+
+[node name="MazeGenerator" type="Node2D" parent="." unique_id=1287320343]
+script = ExtResource("2_maze")
+
+[node name="Streets" type="TileMapLayer" parent="MazeGenerator" unique_id=2021674174]
+
+[node name="RoadVisuals" type="Node2D" parent="MazeGenerator" unique_id=692007124]
+
+[node name="Houses" type="TileMapLayer" parent="MazeGenerator" unique_id=741646304]
+z_index = 1
+
+[node name="Decorations" type="Node2D" parent="MazeGenerator" unique_id=589238793]
+
+[node name="Overlays" type="Node2D" parent="MazeGenerator" unique_id=232409967]
+
+[node name="WorldBounds" type="StaticBody2D" parent="MazeGenerator" unique_id=1510650833]
+
+[node name="EditorPlaceholder" type="CollisionShape2D" parent="MazeGenerator/WorldBounds" unique_id=193937446]
+shape = SubResource("RectangleShape2D_world_bounds_placeholder")
+disabled = true
+
+[node name="Collectibles" type="Node2D" parent="." unique_id=1079538964]
+
+[node name="Player" parent="." unique_id=1055265136 instance=ExtResource("3_player")]
+
+[node name="WorldFilter" type="CanvasLayer" parent="." unique_id=2028203579]
+layer = 5
+
+[node name="ColorFocusOverlay" type="ColorRect" parent="WorldFilter" unique_id=1823632318]
+material = SubResource("ShaderMaterial_focus")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_focus")
+target_path = NodePath("../../Player")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1299691133]
+layer = 10
+
+[node name="CounterPanel" type="PanelContainer" parent="UI" unique_id=863097389]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 218.0
+offset_bottom = 62.0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/CounterPanel" unique_id=727449348]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="CounterLabel" type="Label" parent="UI/CounterPanel/MarginContainer" unique_id=1455584348]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Coletados: 0 / 0"
+
+[node name="TouchJoystick" parent="UI" unique_id=7206964 instance=ExtResource("6_joystick")]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="StartPopup" parent="UI" unique_id=438624887 instance=ExtResource("5_start")]
+
+[node name="PopupMessage" parent="UI" unique_id=1140644734 instance=ExtResource("4_popup")]

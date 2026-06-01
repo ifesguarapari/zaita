@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/TouchJoystick.gd" id="1_joystick"]
+
+[node name="TouchJoystick" type="Control" groups=["touch_navigation"]]
+script = ExtResource("1_joystick")
