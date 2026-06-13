@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_player"]
 
@@ -7,8 +7,8 @@ radius = 7.0
 height = 18.0
 
 [sub_resource type="Gradient" id="Gradient_player_light"]
-offsets = PackedFloat32Array(0, 0.42, 1)
-colors = PackedColorArray(1, 0.83, 0.42, 1, 1, 0.68, 0.24, 0.52, 1, 0.52, 0.14, 0)
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 0.18, 1, 1, 1, 0.07, 1, 1, 1, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_player_light"]
 gradient = SubResource("Gradient_player_light")
@@ -18,15 +18,34 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="Gradient" id="Gradient_foot_shadow"]
+offsets = PackedFloat32Array(0, 0.48, 0.82, 1)
+colors = PackedColorArray(0.03, 0.028, 0.025, 0.28, 0.04, 0.037, 0.033, 0.16, 0.05, 0.047, 0.043, 0.04, 0.05, 0.047, 0.043, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_foot_shadow"]
+gradient = SubResource("Gradient_foot_shadow")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_player")
 
+[node name="FootShadow" type="Sprite2D" parent="."]
+position = Vector2(0, -0.8)
+scale = Vector2(0.13, 0.03)
+z_index = -2
+texture_filter = 4
+texture = SubResource("GradientTexture2D_foot_shadow")
+
 [node name="PointLight2D" type="PointLight2D" parent="."]
 position = Vector2(0, -1)
-color = Color(1, 0.72, 0.32, 1)
-energy = 1.08
+color = Color(1, 1, 1, 1)
+energy = 0.18
 texture = SubResource("GradientTexture2D_player_light")
-texture_scale = 1.48
+texture_scale = 2.35
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -27)
@@ -37,6 +56,6 @@ position = Vector2(0, 2)
 shape = SubResource("CapsuleShape2D_player")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(1.4, 1.4)
+zoom = Vector2(0.92, 0.92)
 position_smoothing_enabled = true
 position_smoothing_speed = 5.2

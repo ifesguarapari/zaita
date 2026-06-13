@@ -5,17 +5,18 @@ const BASE_TILE_SIZE := 64
 const ATLAS_COLUMNS := 12
 const SOURCE_ID := 0
 const TILESET_TEXTURE_PATH := "res://assets/tiles/zaita-tileset.png"
+const ROAD_TEXTURE_PATH := "res://assets/textures/clay.svg"
 const ROAD_FLOOR_SHADER := preload("res://assets/shaders/road_floor_gray.gdshader")
+const ROAD_TEXTURE_SHADER := preload("res://assets/shaders/road_clay_floor.gdshader")
 const ROAD_MARGIN := 1
 const ROAD_NORTH := 1
 const ROAD_EAST := 2
 const ROAD_SOUTH := 4
 const ROAD_WEST := 8
 const ROAD_LOOP_CHANCE := 0.18
-const ROAD_FLOOR_VARIATION_CHANCE := 0.18
-const HOUSE_EDGE_FLOOR_VARIATION_CHANCE := 0.72
-const ROAD_FLOOR_SOURCE_INSET := 2
-const ROAD_FLOOR_MARGIN := 2.0
+const ROAD_TEXTURE_REGION_RATIO := 0.62
+const ROAD_TEXTURE_REPEAT := 5.6
+const ROAD_TEXTURE_MODULATE := Color(1.16, 1.12, 1.06, 1.0)
 const ROAD_DIRECTIONS := [
 	{"delta": Vector2i.UP, "bit": ROAD_NORTH, "opposite": ROAD_SOUTH},
 	{"delta": Vector2i.RIGHT, "bit": ROAD_EAST, "opposite": ROAD_WEST},
@@ -170,7 +171,9 @@ var _atlas_cells_by_group: Dictionary = {}
 var _region_queues: Dictionary = {}
 var _runtime_tile_set: TileSet
 var _source_texture: Texture2D
+var _road_texture: Texture2D
 var _road_floor_material: ShaderMaterial
+var _road_texture_material: ShaderMaterial
 
 
 func generate() -> Dictionary:
@@ -396,34 +399,56 @@ func _paint_tiles(layout: Dictionary) -> void:
 
 
 func _paint_road_visuals() -> void:
-	for cell in _road_cells:
-		var floor_region: Rect2i = TILE_REGIONS["floors"][0]
-		var variation_chance := (
-			HOUSE_EDGE_FLOOR_VARIATION_CHANCE
-			if _is_house_edge(cell)
-			else ROAD_FLOOR_VARIATION_CHANCE
-		)
-		var uses_variation := _rng.randf() < variation_chance
-		if uses_variation:
-			floor_region = _pick_region("floors")
-		_spawn_road_floor(cell, floor_region, uses_variation)
+	_spawn_road_floor()
 
 
-func _spawn_road_floor(cell: Vector2i, region: Rect2i, uses_variation: bool) -> void:
+func _spawn_road_floor() -> void:
+	if _road_texture == null:
+		return
+
 	var sprite := Sprite2D.new()
-	var display_region := region.grow(-ROAD_FLOOR_SOURCE_INSET)
-	sprite.texture = _source_texture
-	sprite.region_enabled = true
-	sprite.region_rect = display_region
+	var texture_region := _get_road_texture_region()
+	var texture_size := Vector2(_road_texture.get_width(), _road_texture.get_height())
+	var map_size := Vector2(map_width * tile_size, map_height * tile_size)
+	sprite.texture = _road_texture
+	sprite.region_enabled = false
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	sprite.position = Vector2(cell) * tile_size + Vector2.ONE * tile_size * 0.5
-	var display_size := float(tile_size) - ROAD_FLOOR_MARGIN
-	sprite.scale = Vector2(display_size / display_region.size.x, display_size / display_region.size.y)
-	sprite.material = _get_road_floor_material()
-	sprite.set_meta("tileset_group", "floors")
-	sprite.set_meta("source_floor_region", region)
-	sprite.set_meta("uses_floor_variation", uses_variation)
+	sprite.position = map_size * 0.5
+	sprite.scale = Vector2(
+		map_size.x / texture_size.x,
+		map_size.y / texture_size.y
+	)
+	sprite.modulate = ROAD_TEXTURE_MODULATE
+	var road_material := _get_road_texture_material()
+	road_material.set_shader_parameter(
+		"sample_origin",
+		Vector2(texture_region.position) / texture_size
+	)
+	road_material.set_shader_parameter(
+		"sample_size",
+		Vector2(texture_region.size) / texture_size
+	)
+	road_material.set_shader_parameter("texture_repeat", ROAD_TEXTURE_REPEAT)
+	sprite.material = road_material
+	sprite.set_meta("tileset_group", "clay")
+	sprite.set_meta("texture_path", ROAD_TEXTURE_PATH)
+	sprite.set_meta("source_texture_region", texture_region)
+	sprite.set_meta("covers_map", true)
 	road_visuals.add_child(sprite)
+
+
+func _get_road_texture_region() -> Rect2i:
+	var texture_size := Vector2i(_road_texture.get_width(), _road_texture.get_height())
+	var sample_size := roundi(mini(texture_size.x, texture_size.y) * ROAD_TEXTURE_REGION_RATIO)
+	if sample_size <= 0:
+		return Rect2i(Vector2i.ZERO, Vector2i.ONE)
+
+	var remaining_size := texture_size - Vector2i.ONE * sample_size
+	var origin := Vector2i(
+		floori(float(remaining_size.x) / 2.0),
+		floori(float(remaining_size.y) / 2.0)
+	)
+	return Rect2i(origin, Vector2i.ONE * sample_size)
 
 
 func _get_road_floor_material() -> ShaderMaterial:
@@ -433,11 +458,11 @@ func _get_road_floor_material() -> ShaderMaterial:
 	return _road_floor_material
 
 
-func _is_house_edge(cell: Vector2i) -> bool:
-	for direction: Dictionary in ROAD_DIRECTIONS:
-		if cell + direction["delta"] in _blocked_cells:
-			return true
-	return false
+func _get_road_texture_material() -> ShaderMaterial:
+	if _road_texture_material == null:
+		_road_texture_material = ShaderMaterial.new()
+		_road_texture_material.shader = ROAD_TEXTURE_SHADER
+	return _road_texture_material
 
 
 func _ensure_world_bounds() -> void:
@@ -464,6 +489,7 @@ func _add_world_bound(bound_position: Vector2, size: Vector2) -> void:
 
 
 func _ensure_runtime_tile_set() -> void:
+	_ensure_road_texture()
 	if _runtime_tile_set != null:
 		_apply_runtime_tile_set()
 		return
@@ -516,6 +542,15 @@ func _ensure_runtime_tile_set() -> void:
 		_add_house_collision(atlas_source.get_tile_data(atlas_cell, 0))
 
 	_apply_runtime_tile_set()
+
+
+func _ensure_road_texture() -> void:
+	if _road_texture != null:
+		return
+
+	_road_texture = load(ROAD_TEXTURE_PATH) as Texture2D
+	if _road_texture == null:
+		push_error("Could not load road texture: %s" % ROAD_TEXTURE_PATH)
 
 
 func _copy_region_to_atlas(

@@ -71,7 +71,6 @@ func _ready() -> void:
 	_build_sprite_frames_from_json()
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	z_index = ACTOR_Z_OFFSET
-	queue_redraw()
 	_update_animation()
 
 
@@ -273,21 +272,3 @@ func _add_json_animation(
 
 	frames.set_animation_speed(animation_name, 1000.0 / default_duration)
 	_animation_source_heights[animation_name] = source_height
-
-
-func _draw() -> void:
-	_draw_soft_ellipse(Vector2(-19, -7), Vector2(38, 12), Color(1.0, 0.69, 0.25, 0.08))
-	_draw_soft_ellipse(Vector2(-14, -5), Vector2(28, 9), Color(1.0, 0.76, 0.34, 0.12))
-	_draw_soft_ellipse(Vector2(-9, -3), Vector2(18, 6), Color(1.0, 0.84, 0.48, 0.16))
-
-
-func _draw_soft_ellipse(top_left: Vector2, ellipse_size: Vector2, color: Color) -> void:
-	var points := PackedVector2Array()
-	for index in range(24):
-		var angle := TAU * float(index) / 24.0
-		points.append(
-			top_left
-			+ ellipse_size * 0.5
-			+ Vector2(cos(angle) * ellipse_size.x * 0.5, sin(angle) * ellipse_size.y * 0.5)
-		)
-	draw_colored_polygon(points, color)

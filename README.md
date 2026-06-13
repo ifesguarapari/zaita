@@ -29,9 +29,10 @@ Para executar o smoke test permanente:
 - `scenes/StartPopup.tscn`: introdução da partida.
 - `scenes/TouchJoystick.tscn`: controle touch analógico quantizado em oito direções.
 - `scripts/MazeGenerator.gd`: geração aleatória do labirinto conectado com `TileMapLayer`.
-- `scripts/ColorFocusOverlay.gd`: filtro radial que preserva a cor perto de Zaíta e reduz a saturação à distância.
+- `scripts/ColorFocusOverlay.gd`: filtro radial que preserva a cor perto de Zaíta e leva o restante do mundo para cinza claro.
 - `tests/RuntimeSmokeTest.gd`: validação headless permanente do mapa e da coleta.
 - `assets/tiles/zaita-tileset.png`: catálogo visual processado em tempo de execução para compor ruas, casas e detalhes.
+- `assets/textures/clay.svg`: textura de barro usada sobre as ruas para compor o chão caminhável.
 - `assets/sprites/zaita-*.png`: folhas de animação da personagem, recortadas conforme os JSONs correspondentes.
 - `assets/images/zaita-collectibles.png`: catálogo transparente dos objetos coletáveis.
 
@@ -48,4 +49,4 @@ Um novo labirinto é gerado ao clicar em **Começar** e ao clicar em **Jogar nov
 
 Os textos dos popups ficam agrupados em `scripts/Main.gd`. O código também contém comentários `TODO` indicando os pontos planejados para efeitos sonoros e fases futuras.
 
-As seções selecionadas do catálogo `zaita-tileset.png` são recortadas em tempo de execução. O mapa padrão mede `50x50`: o primeiro piso forma a base nítida das ruas largas, com variações discretas junto às casas; pisos também aparecem nas bordas e em praças; casas, fachadas, telhados, paredes e escadas preenchem as quadras. Objetos urbanos e colecionáveis são sorteados apenas sobre as ruas.
+As seções selecionadas do catálogo `zaita-tileset.png` são recortadas em tempo de execução. O mapa padrão mede `50x50`: o primeiro piso forma a base nítida das ruas largas, enquanto uma textura contínua de `assets/textures/clay.svg` cria o chão de barro por cima; pisos também aparecem nas bordas e em praças; casas, fachadas, telhados, paredes e escadas preenchem as quadras. Objetos urbanos e colecionáveis são sorteados apenas sobre as ruas.

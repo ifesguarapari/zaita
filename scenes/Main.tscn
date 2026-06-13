@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/PopupMessage.tscn" id="4_popup"]
 [ext_resource type="PackedScene" path="res://scenes/StartPopup.tscn" id="5_start"]
 [ext_resource type="PackedScene" path="res://scenes/TouchJoystick.tscn" id="6_joystick"]
-[ext_resource type="Script" path="res://scripts/ColorFocusOverlay.gd" id="8_focus"]
+[ext_resource type="Script" uid="uid://ckj3u5q7dwdgq" path="res://scripts/ColorFocusOverlay.gd" id="8_focus"]
 [ext_resource type="Shader" uid="uid://b2e4dvskbx0d2" path="res://assets/shaders/color_focus.gdshader" id="9_focus_shader"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_world_bounds_placeholder"]
@@ -15,12 +15,26 @@ size = Vector2(1, 1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_focus"]
 shader = ExtResource("9_focus_shader")
 shader_parameter/focus_position = Vector2(0.5, 0.5)
+shader_parameter/focus_ellipse = Vector2(1.58, 0.78)
+shader_parameter/focus_drift = Vector2(0.012, 0.006)
+shader_parameter/focus_drift_speed = 0.7
+shader_parameter/focus_pulse_min = 1.0
+shader_parameter/focus_pulse_max = 2.0
+shader_parameter/focus_pulse_speed = 0.78
+shader_parameter/foot_ellipse = Vector2(0.066, 0.02)
+shader_parameter/foot_offset = Vector2(0, -0.004)
+shader_parameter/foot_shadow_color = Vector3(0.18, 0.17, 0.16)
+shader_parameter/foot_shadow_strength = 0.0
+shader_parameter/foot_shadow_core_strength = 0.0
 shader_parameter/aspect_ratio = 1.777
-shader_parameter/color_radius = 0.14
-shader_parameter/fade_width = 0.42
-shader_parameter/distant_saturation = 0.08
-shader_parameter/distant_brightness = 0.58
-shader_parameter/vignette_strength = 0.28
+shader_parameter/color_radius = 0.19
+shader_parameter/fade_width = 0.12
+shader_parameter/distant_saturation = 0.0
+shader_parameter/distant_brightness = 1.0
+shader_parameter/distant_gray_floor = 0.46
+shader_parameter/distant_contrast = 0.58
+shader_parameter/focus_brightness = 1.0
+shader_parameter/vignette_strength = 0.0
 
 [node name="Main" type="Node2D" unique_id=2100362352]
 script = ExtResource("1_main")
@@ -32,7 +46,7 @@ mouse_filter = 2
 color = Color(0.11, 0.09, 0.1, 1)
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1020203349]
-color = Color(0.72, 0.74, 0.8, 1)
+color = Color(0.86, 0.86, 0.88, 1)
 
 [node name="MazeGenerator" type="Node2D" parent="." unique_id=1287320343]
 script = ExtResource("2_maze")
